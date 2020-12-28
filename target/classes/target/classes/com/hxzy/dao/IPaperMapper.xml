@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxzy.dao.IPaperMapper">
+	<!-- 试卷中插入数据 -->
+	<insert id="add" useGeneratedKeys="true" keyProperty="pid" parameterType="Paper">
+		<selectKey keyProperty="pid" resultType="int" order="BEFORE">
+	          select test_seq.nextval pid from dual
+	    </selectKey>
+    	insert into t_paper t (t.pid,t.pname,t.ptimes,t.statime,t.qids,t.status,t.url,t.pcourse) values(#{pid,jdbcType=VARCHAR},#{pname},#{ptimes},
+    	#{statime},#{qids},'1',#{url},#{pcourse})
+ 	</insert>
+ 	
+ 	<!-- 查询数据  通过MAP对象，返回question实体类对象-->
+   <select id="getListByMap" parameterType="map" resultType="Question">
+         select a.id,a.qname,a.qscore,a.qcourse,a.qtype from
+        (select  t.qid id,t.qname qname,t.qscore qscore,t.qcourse qcourse,t.qtype qtype from
+		(select q.id qid,q.qname qname,q.qscore qscore,q.qtype qtype,q.qcourse qcourse  from t_question q 
+		where q.qcourse=#{qcourse} and q.qstage=#{qstage} order by dbms_random.value)t 
+		where t.qtype='1' and rownum <![CDATA[<=]]>#{qsingle}
+		union
+		select  t.qid id,t.qname qname,t.qscore qscore,t.qcourse qcourse,t.qtype qtype from
+		(select q.id qid,q.qname qname,q.qscore qscore,q.qtype qtype,q.qcourse qcourse from t_question q 
+		where q.qcourse=#{qcourse} and q.qstage=#{qstage} order by dbms_random.value)t 
+		where t.qtype='2' and rownum <![CDATA[<=]]>#{qmultiple} 
+		union
+		select  t.qid id,t.qname qname,t.qscore qscore,t.qcourse qcourse,t.qtype qtype from
+		(select q.id qid,q.qname qname,q.qscore qscore,q.qtype qtype,q.qcourse qcourse from t_question q 
+		where q.qcourse=#{qcourse} and q.qstage=#{qstage} order by dbms_random.value)t 
+		where t.qtype='3' and rownum <![CDATA[<=]]>#{qjudge} ) a order by a.id
+		
+   </select>
+ 	<!-- 查询选项数据 通过qid，返回option实体类对象-->
+ 	<select id="getListById" parameterType="string" resultType="Option">
+       select o.id,o.opcontent from t_option o  where o.qid=#{qid} order by o.id
+   </select>
+</mapper>

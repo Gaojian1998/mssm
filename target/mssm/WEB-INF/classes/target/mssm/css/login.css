@@ -1,0 +1,50 @@
+body{
+	background-color: darkseagreen;
+}
+#login{
+	width:500px;
+	height:300px;
+	background-color: white;
+	margin:150px auto;
+}
+h2{
+	margin-left:190px;
+	position: relative;
+	top:20px;
+	color: dimgrey;
+}
+
+form{
+	margin-left: 60px;
+	margin-top: 50px;
+}
+form div{
+	margin-bottom: 20px;
+}
+.myname input{
+	width:250px;
+	height: 26px;;
+}
+.mypwd input{
+	width:250px;
+	height: 26px;;
+}
+.remenber{
+	float:left;
+	
+}
+
+.forget a{
+	position: relative;
+	right:-170px;
+}
+
+.mybutton button{
+	width:70px;
+    height: 30px;
+	background-color: darkseagreen;
+	margin-left:130px;
+}
+.mybutton button :hover{
+	cursor: pointer;
+}

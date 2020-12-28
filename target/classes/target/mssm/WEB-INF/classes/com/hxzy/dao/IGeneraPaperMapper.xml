@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxzy.dao.IGeneraPaperMapper">
+     <select id="togetQueryBytid" parameterType="String" resultType="Type">
+         select t.typeid,t.typename,t.type from t_type t
+         where t.type=#{tid}   
+     </select>
+     <select id="getQueryOption" parameterType="int" resultType="Option">
+         select t.id,t.opcontent,t.qid from t_option t
+         where t.qid=#{qid}
+     </select>
+     <select id="randomSelTop" parameterType="map" resultType="Question">	
+        select * from(
+		select rownum rn,c.id,c.qanswer,c.qname,c.qscore,c.qtype,c.qcourse,c.qstage from
+		(select t.id,t.qanswer,t.qname,t.qscore,a.typename qtype,b.typename qcourse,t.qstage from t_question t
+		left join t_type a on a.typeid=t.qtype and a.type='0'
+		left join t_type b on b.typeid=t.qcourse and b.type='2'
+		where t.qtype='1'and t.qcourse=#{couresTyp} and t.qstage=#{statgesTyp} 
+		order by dbms_random.random)c
+		where rownum&lt;=#{singChNum}
+		union 
+		select rownum rn,c.id,c.qanswer,c.qname,c.qscore,c.qtype,c.qcourse,c.qstage from
+		(select t.id,t.qanswer,t.qname,t.qscore,a.typename qtype,b.typename qcourse,t.qstage from t_question t
+		left join t_type a on a.typeid=t.qtype and a.type='0'
+		left join t_type b on b.typeid=t.qcourse and b.type='2'
+		where t.qtype='2'and t.qcourse=#{couresTyp} and t.qstage=#{statgesTyp} 
+		order by dbms_random.random )c
+		where rownum&lt;=#{moreChNum}
+		union
+		select rownum rn,c.id,c.qanswer,c.qname,c.qscore,c.qtype,c.qcourse,c.qstage from
+		(select t.id,t.qanswer,t.qname,t.qscore,a.typename qtype,b.typename qcourse,t.qstage from t_question t
+		left join t_type a on a.typeid=t.qtype and a.type='0'
+		left join t_type b on b.typeid=t.qcourse and b.type='2'
+		where t.qtype='3'and t.qcourse=#{couresTyp} and t.qstage=#{statgesTyp}
+		order by dbms_random.random )c
+		where rownum&lt;=#{judegeNum}) d
+		order by d.qtype
+     </select>
+</mapper>

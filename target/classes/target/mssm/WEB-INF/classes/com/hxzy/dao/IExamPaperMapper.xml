@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxzy.dao.IExamPaperMapper">
+    <!--获取试题内容  -->
+   <select id="getExamContent" parameterType="string" resultMap="questions">
+     select q.id,q.qanswer,q.qname,q.qscore,q.qtype,q.qstage,o.id oid,o.opcontent from t_Question q ,t_option o 
+     where q.id=o.qid and q.id in(${qids}) order by q.qtype,q.id,o.id 
+   </select>
+   <resultMap type="Question" id="questions">
+      <id property="id" column="id"/>
+      <result property="qanswer" column="qanswer"/>
+      <result property="qname" column="qname"/>
+      <result property="qscore" column="qscore"/>
+      <result property="qtype" column="qtype"/>
+       <result property="qstage" column="qstage"/>
+      <collection property="options" ofType="Option">
+        <id property="id" column="oid"/>
+        <result property="opcontent" column="opcontent"/>
+      </collection>
+   </resultMap>
+   <!-- 获取客观题路径 -->
+   <select id="getFilePath" parameterType="string" resultType="string">
+    select url from t_paper where pid=#{pid,jdbcType=VARCHAR}
+   </select>
+   <!--添加成绩信息  -->
+   <insert id="saveScore" parameterType="Scores">
+      insert into t_scores(scid,begintime,scores,pid,userid,myanswer,usetimes)
+      values(test_seq.nextval,#{begintime},#{scores},#{paper.pid},#{user.id},#{myanswer},#{usetimes})
+   </insert>
+   
+     
+</mapper>

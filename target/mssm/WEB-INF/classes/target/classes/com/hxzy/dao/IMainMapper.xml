@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxzy.dao.IMainMapper">
+     <cache/>
+     <select id="getMenuByPid" parameterType="String" resultType="Menu">
+         select t.id,t.name,t.pid,t.url,t.icon from t_tmenu t 
+         where t.pid=#{pid}
+     </select>
+     <select id="questionTypeAnaly" resultType="map">
+         select decode(t.qtype ,'1','单选题','2','多选题','3','判断题') type ,count(*) count from t_question t group by t.qtype
+     </select>
+     <select id="scoresTop10" resultType="map">
+           select a.username,a.scores from (
+			    select distinct u.username,t.scores from t_scores t 
+			    left join t_user u on t.userid=u.id and u.usertype='1'
+			    where u.username is not null
+			    order by t.scores desc 
+		   )a where rownum&lt;=10
+     
+     </select>
+     <select id="seltCoursesNum" resultType="map">
+           select a.qcourse,a.count,t.typename from
+			(select q.qcourse,count(q.qcourse) count from t_question q
+			group by q.qcourse
+			order by count(q.qcourse) desc)a
+			left join t_type t on a.qcourse=t.typeid and t.type='2'
+     </select>
+     <update id="upStatusByScheduled">
+          update t_paper t set t.status='0' 
+          where t.statime+t.ptimes/24&lt;sysdate 
+          and t.status='1'
+     </update>
+</mapper>

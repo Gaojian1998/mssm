@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxzy.dao.IPaperManagerMapper">
+       <!--查询试卷的总记录数-->
+       <select id="allCount" resultType="int">
+           select count(*) count from t_paper
+       </select>
+      <!--查询试卷信息-->
+      <select id="getPaperInfo"  parameterType="map"  resultType="Paper">
+           <!-- select t.pid,t.pname,t.ptimes,t.statime,t.qids,decode(t.status,'1','有效','0','无效','其它') status,t.url from t_paper t -->
+           select * from (
+			  select rownum rn,a.* from
+			 (select t.pid,t.pname,t.ptimes,t.statime,t.qids,decode(t.status,'1','有效','0','无效','其它') status,t.url 
+			 from t_paper t
+			 order by t.statime desc)a
+			 where <![CDATA[rownum<=#{endRow}]]>) b
+			 where rn<![CDATA[>]]>#{startRow}
+      </select>
+      <!--查询试卷试题-->
+      <select id="getQuestionByPid" parameterType="String" resultType="Question">
+        select q.id,q.qname,a.typename qtype from t_question q
+		left join t_type a on q.qtype=a.typeid and a.type='0'
+		left join t_type b on q.qtype=b.typeid and b.type='1'
+		left join t_type c on q.qtype=c.typeid and c.type='2'
+		where q.id in (${qids})
+      </select>
+      <!--试题选项查询-->
+      <select id="getOptionByPid" parameterType="int" resultType="Option">
+        select t.id,t.opcontent from t_option t
+        where t.qid=#{pid}
+      </select>
+      
+</mapper>

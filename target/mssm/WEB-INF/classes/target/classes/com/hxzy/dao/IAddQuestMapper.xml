@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxzy.dao.IAddQuestMapper">
+      <insert id="insertQuestion" parameterType="Question" useGeneratedKeys="true" keyProperty="id">
+	       <selectKey keyProperty="id" resultType="int" order="BEFORE">
+	           select test_seq.nextval id from dual
+	       </selectKey>
+           insert into t_question (id,qanswer,qname,qscore,qtype,qcourse,qstage) values(#{id},#{qanswer,jdbcType=VARCHAR},#{qname},#{qscore},#{qtype},#{qcourse},#{qstage})
+      </insert>
+      <!--插入选项-->
+      <insert id="addchoose" parameterType="Option">
+         insert into t_option (id,opcontent,qid) values(test_seq.nextval,#{opcontent},#{qid})
+      </insert>
+</mapper>

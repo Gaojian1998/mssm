@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxzy.dao.IGradeManagementMapper">
+   <!-- 查询学生成绩信息 -->
+     <select id="queryScoreInfo" parameterType="map" resultType="map">
+         select b.scid,b.scores,b.begintime,b.usetimes,b.pname,b.userid,b.username from 
+	    (select a.scid,a.scores,a.begintime,a.usetimes,a.pname,a.userid,u.username ,rownum rn from
+		(select t.scid,t.scores,t.begintime,t.usetimes,p.pname,t.userid from t_scores t left join  t_paper p on t.pid=p.pid) a 
+		left join t_user u on a.userid=u.id 
+      <include refid="wheres"></include>  and rownum<![CDATA[<=]]>#{endrow} ) b where rn>=#{startrow}
+   </select>
+   
+   <!-- 总记录数 -->
+   <select id="count" parameterType="map" resultType="int">
+	    select count(*) from
+		(select t.scid,t.scores,t.begintime,t.usetimes,p.pname,t.userid from t_scores t left join  t_paper p on t.pid=p.pid) a 
+		left join t_user u on a.userid=u.id  
+     <include refid="wheres"></include>
+   </select>
+   <!--代码块 模糊查询用band标签 -->
+   <sql id="wheres">
+     <bind name="likename" value="'%'+name+'%'"/>
+     <where>
+        1=1
+        <if test="name!=null and name!=''">
+           and u.username like #{likename}
+        </if>
+         <if test="pname!=null and pname!=''">
+           and  a.pname=#{pname}
+        </if>
+        
+     </where>
+   </sql> 
+   
+   <!--清空成绩信息  -->
+   <delete id="clear">
+      delete from t_scores 
+   </delete>
+   <!--  批量删除-->
+   <delete id="delMore" parameterType="string">
+      delete from t_scores where scid in (${ids})
+   </delete>
+   <!-- 查询用户Id -->
+   <select  id="getUserIdByUsername" parameterType="string" resultType="string">
+     select id from t_user where username=#{username,jdbcType=VARCHAR}
+   </select>
+   <!-- 查询试卷id -->
+   <select  id="getPidByPname" parameterType="string" resultType="Paper">
+     select pid ,ptimes from t_paper where pname =#{pname,jdbcType=VARCHAR}
+   </select>
+   <!-- 添加成绩信息 -->
+   <insert id="addScore" parameterType="Scores" >
+     insert into t_scores(scid,begintime,scores,pid,userid,myanswer,usetimes)
+     values(test_seq.nextval,#{begintime},#{scores},#{paper.pid},#{user.id},#{myanswer},#{usetimes})
+   </insert>
+   <!-- 通过成绩id查询成绩信息 -->
+   <select id="getScoresByScid" parameterType="string" resultType="Scores">
+    select t.scid,	t.myanswer,t.sanswers from t_scores t where t.scid=#{id}
+   </select>
+   <!-- 修改成绩 -->
+   <update id="updateScore" parameterType="string">
+     update t_scores set scores=#{1} where scid=#{0}
+   </update>
+   <!-- 获取试卷例题的内容 -->
+   <select id="getQuestionByQids" parameterType="string" resultMap="questions">
+     select q.id,q.qanswer,q.qname,q.qtype,o.id oid,o.opcontent from t_Question q ,t_option o 
+     where q.id=o.qid and q.id in (${qids}) order by q.qtype,q.id,o.id 
+   </select>
+   <resultMap type="Question" id="questions">
+      <id property="id" column="id"/>
+      <result property="qanswer" column="qanswer"/>
+      <result property="qname" column="qname"/>
+      <result property="qtype" column="qtype"/>
+       <result property="qstage" column="qstage"/>
+      <collection property="options" ofType="Option">
+        <id property="id" column="oid"/>
+        <result property="opcontent" column="opcontent"/>
+      </collection>
+   </resultMap>
+</mapper>

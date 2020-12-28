@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxzy.dao.IQuestionMapper">
+      <!--题库管理的下拉菜单  m代表下拉框的类型-->   
+      <select id="profeQuery" parameterType="String" resultType="Type">
+         select t.typeid,t.typename,t.type from t_type t where  t.type=#{m}
+      </select>
+      <!--条件查询获取总记录数-->
+      <select id="getQustionCount" parameterType="map" resultType="int">
+        select count(*)count from(
+		select t.id,t.qanswer,t.qname,t.qscore,a.typename qtype,c.typename qcourse,b.typename qstage  from t_question t
+		left join t_type a on t.qtype=a.typeid and a.type='0'
+		left join t_type c on t.qcourse=c.typeid  and c.type='2'
+		left join t_type b on t.qstage=b.typeid and b.type='1'
+		<include refid="where_sql"></include>)
+      </select>
+      <!--条件查询获取指定试题-->
+      <select id="getQustion" parameterType="map" resultType="Question">
+        select f.* from (
+		select rownum rn,d.* from(
+		select t.id,t.qanswer,t.qname,t.qscore,a.typename qtype,c.typename qcourse,b.typename qstage  from t_question t
+		left join t_type a on t.qtype=a.typeid and a.type='0'
+		left join t_type c on t.qcourse=c.typeid  and c.type='2'
+		left join t_type b on t.qstage=b.typeid and b.type='1'
+		<include refid="where_sql"></include>
+		 order by t.id desc)d
+		 where <![CDATA[rownum<=#{endRow}]]>) f
+		 where  rn<![CDATA[>=]]>#{startRow}
+      </select>
+      <!--共用 sql语句-->
+      <sql id="where_sql">
+         <where>
+		     1=1
+			<if test="qcoutypid !=null and qcoutypid !='' ">
+				and t.qtype=#{qcoutypid}
+			</if>
+			<if test="proftypid !=null and proftypid !='' ">
+				and t.qcourse=#{proftypid}
+			</if>
+			<if test="stagetypid !=null and stagetypid !='' ">
+				and t.qstage=#{stagetypid}
+			</if>
+			<if test="qnam !=null and qnam !='' ">
+				and t.qname like '%${qnam}%'
+			</if>
+		</where>
+      </sql>
+      <!--删除单条数据-->
+      <delete id="toDel" parameterType="String">
+          delete from t_question t where t.id=#{id}
+      </delete>
+      <!--删除多条数据-->
+      <delete id="toDelMore" parameterType="String">
+         delete from t_question t where t.id in (${ids})
+      </delete>
+      <!--查看选项-->
+      <select id="toQueryChoose" parameterType="int" resultType="Option">
+	      select t.id,t.opcontent from t_option t
+	      where t.qid=#{qid}
+      </select>
+      <!--修改-->
+      <select id="getObjByid" parameterType="String" resultType="Question">
+         select t.id,t.qanswer,t.qanswer,t.qscore,a.typename qtype,b.typename qcourse,c.typename qstage from t_question t 
+		 left join t_type a on a.typeid=t.qtype and a.type='0'
+		 left join t_type b on b.typeid=t.qcourse and b.type='2'
+		 left join t_type c on c.typeid=t.qstage and c.type='1'
+		 where t.id=#{qid}
+      </select>
+</mapper>

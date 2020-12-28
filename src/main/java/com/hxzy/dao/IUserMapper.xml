@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxzy.dao.IUserMapper">
+	<!-- 查询数据拼表格 -->
+	<select id="query" parameterType="map" resultType="User">
+		select  b.id,b.username,b.usertype,b.pwd,b.age,b.sex,b.tel from (
+			select a.id,a.username,a.usertype,a.pwd,a.age,a.sex,a.tel,rownum rn from(
+			   select t.id, t.username,decode(t.usertype,1,'学生',0,'管理员') usertype,t.pwd,t.age,decode(t.sex,1,'男',0,'女') sex,t.tel from t_user t
+			   where 1=1
+			   <if test="name!=null and name!='' ">
+			     and t.username like '%${name}%'
+			   </if> 
+			   <if test="usertype!=null and usertype!='' ">
+			     and t.usertype=#{usertype}
+			   </if> 
+			   order by id
+			) a where rownum&lt;=#{endrow}
+		) b 
+		where b.rn&gt;=#{startrow}
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="count" parameterType="user" resultType="int">
+		select count(*) count from t_user
+	</select>
+	<!-- 增加 -->
+	<insert id="add" parameterType="map" >
+		insert into t_user (id,username,usertype,age,sex,tel) values (test_seq.nextval,#{username},#{usertype},#{age},#{sex},#{tel})
+	</insert>
+	<!-- 删除 -->
+	<delete id="del" parameterType="String">
+		delete from t_user where id=#{id}
+	</delete> 
+	<!-- 批量删除 -->
+	<delete id="delMore" parameterType="Map">
+	<!-- delete from t_usr t where t.id in 
+      <foreach collection="ids" open="(" separator="," close=")" item="id">
+         #{id}
+      </foreach> -->
+		delete from t_user t where t.id in (${ids})
+	</delete>
+	<!-- 修改 -->
+	<update id="modify" parameterType="map">
+		update t_user set username=#{username},usertype=#{usertype},age=#{age},sex=#{sex},tel=#{tel} where id=#{id}
+	</update>
+	<!-- 查询单条 -->
+	<select id="getObjById" parameterType="String" resultType="User">
+		select t.id,t.username,t.usertype,t.age,t.sex,t.tel from t_user t where  id=#{id}
+	</select>
+</mapper>

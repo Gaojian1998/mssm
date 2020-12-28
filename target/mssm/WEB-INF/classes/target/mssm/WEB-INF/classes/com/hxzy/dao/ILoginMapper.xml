@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxzy.dao.ILoginMapper">
+    <!--查询用户是否存在  -->
+    <select  id="checkLogin" parameterType="User" resultType="User">
+      select id,username,usertype,age,tel,decode(sex,'1','男','0','女','其他') sex from t_user where username=#{username,jdbcType=VARCHAR} and pwd=#{pwd,jdbcType=VARCHAR}
+    </select>
+</mapper>
